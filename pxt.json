@@ -2,7 +2,8 @@
     "name": "Block Coding Project",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "animation": "*"
     },
     "files": [
         "main.blocks",
