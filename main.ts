@@ -6,21 +6,30 @@ enum ActionKind {
 namespace SpriteKind {
     export const SnakeHead = SpriteKind.create()
     export const SnakeBody = SpriteKind.create()
+    export const Elixir = SpriteKind.create()
+}
+function animateElixir () {
+    animation.runMovementAnimation(
+    elixir,
+    animation.animationPresets(animation.bobbing),
+    500,
+    false
+    )
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    moveUp()
     animateUpMove()
+    moveUp()
 })
 function moveRight () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove + snakeSize, snakeHeadYBeforeMove)
 }
 function lenghtenSnake () {
-    if (true) {
+    if (list.length >= 2) {
         lastBodySprite = list[list.length - 1]
         secondLastBodySprite = list[list.length - 2]
-        dx = secondLastBodySprite.x - lastBodySprite.x
-        dy = secondLastBodySprite.y - lastBodySprite.y
+        dx = lastBodySprite.x - secondLastBodySprite.x
+        dy = lastBodySprite.y - secondLastBodySprite.y
         X = lastBodySprite.x + dx
         Y = lastBodySprite.y + dy
         connectBodyParts(X, Y)
@@ -33,9 +42,11 @@ function moveUp () {
 function moveSnakeBodySprite () {
     snakeHeadXBeforeMove = snakeHead.x
     snakeHeadYBeforeMove = snakeHead.y
-    list.insertAt(0, list.pop())
-    list[0].setPosition(snakeHead.x, snakeHead.y)
-    console.log(list)
+    if (list.length > 0) {
+        list.insertAt(0, list.pop())
+        list[0].setPosition(snakeHead.x, snakeHead.y)
+        console.log(list)
+    }
 }
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
     moveUp()
@@ -49,21 +60,24 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Food, function (sprite, other
         apple.startEffect(effects.spray)
         pause(100)
         effects.clearParticles(apple)
-        apple.setPosition(randint(20, 90), randint(20, 90))
+        apple.setPosition(randint(20, 140), randint(20, 90))
+        animateApple()
         lenghtenSnake()
         console.logValue("snakeLenght", list.length)
     } else if (otherSprite == raspberry) {
-        apple.startEffect(effects.spray)
+        raspberry.startEffect(effects.spray)
         pause(100)
-        effects.clearParticles(apple)
-        apple.setPosition(randint(20, 90), randint(20, 90))
+        effects.clearParticles(raspberry)
+        raspberry.setPosition(randint(20, 140), randint(20, 90))
+        animateRaspberry()
         lenghtenSnake()
         console.logValue("snakeLenght", list.length)
-    } else {
+    } else if (otherSprite == banana) {
         banana.startEffect(effects.spray)
         pause(100)
         effects.clearParticles(banana)
-        banana.setPosition(randint(20, 90), randint(20, 90))
+        banana.setPosition(randint(20, 140), randint(20, 90))
+        animateBanana()
         lenghtenSnake()
         console.logValue("snakeLenght", list.length)
     }
@@ -97,6 +111,14 @@ function animateDownMove () {
 function moveDown () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove, snakeHeadYBeforeMove + snakeSize)
+}
+function animateApple () {
+    animation.runMovementAnimation(
+    apple,
+    animation.animationPresets(animation.bobbing),
+    500,
+    false
+    )
 }
 function animateUpMove () {
     snakeHeadAnimation = animation.createAnimation(ActionKind.Walking, 1000)
@@ -152,10 +174,34 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Enemy, function (sprite, othe
     pause(100)
     info.changeLifeBy(-1)
 })
+sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Elixir, function (sprite, otherSprite) {
+    elixir.startEffect(effects.spray)
+    pause(100)
+    effects.clearParticles(elixir)
+    elixir.setPosition(randint(20, 90), randint(20, 90))
+    animateElixir()
+    info.changeLifeBy(1)
+})
+function animateBanana () {
+    animation.runMovementAnimation(
+    banana,
+    animation.animationPresets(animation.bobbing),
+    500,
+    false
+    )
+}
 controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
     moveLeft()
     animateLeftMove()
 })
+function animateRaspberry () {
+    animation.runMovementAnimation(
+    raspberry,
+    animation.animationPresets(animation.bobbing),
+    500,
+    false
+    )
+}
 let temp = 0
 let snakeHeadImage: Image = null
 let sankeBodyImage: Image = null
@@ -166,11 +212,12 @@ let X = 0
 let dy = 0
 let dx = 0
 let secondLastBodySprite: Sprite = null
-let list: Sprite[] = []
 let lastBodySprite: Sprite = null
+let list: Sprite[] = []
 let snakeHeadYBeforeMove = 0
 let snakeHeadXBeforeMove = 0
 let snakeHead: Sprite = null
+let elixir: Sprite = null
 let banana: Sprite = null
 let raspberry: Sprite = null
 let apple: Sprite = null
@@ -181,15 +228,20 @@ setSnakeHead()
 createSnakeBody()
 apple = sprites.create(assets.image`myImage`, SpriteKind.Food)
 apple.setPosition(randint(20, 140), randint(20, 100))
+animateApple()
 raspberry = sprites.create(assets.image`myImage1`, SpriteKind.Food)
 raspberry.setPosition(randint(20, 140), randint(20, 100))
+animateRaspberry()
 banana = sprites.create(assets.image`myImage0`, SpriteKind.Food)
 banana.setPosition(randint(20, 140), randint(20, 100))
-let poisin = sprites.create(assets.image`potion10`, SpriteKind.Enemy)
-poisin.setPosition(randint(20, 140), randint(20, 100))
-poisin.setBounceOnWall(true)
+animateBanana()
+let poison = sprites.create(assets.image`potion10`, SpriteKind.Enemy)
+poison.setPosition(randint(20, 140), randint(20, 100))
+elixir = sprites.create(assets.image`potion12`, SpriteKind.Elixir)
+elixir.setPosition(randint(20, 140), randint(20, 100))
+animateElixir()
 info.setScore(0)
 info.setLife(3)
 game.onUpdateInterval(5000, function () {
-    poisin.setPosition(randint(20, 140), randint(20, 100))
+    poison.setPosition(randint(20, 140), randint(20, 100))
 })
