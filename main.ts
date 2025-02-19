@@ -17,8 +17,11 @@ function animateElixir () {
     )
 }
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    animateUpMove()
-    moveUp()
+    if (currentDirection != "down") {
+        moveUp()
+        animateUpMove()
+        currentDirection = "up"
+    }
 })
 function moveRight () {
     moveSnakeBodySprite()
@@ -49,8 +52,11 @@ function moveSnakeBodySprite () {
     }
 }
 controller.up.onEvent(ControllerButtonEvent.Repeated, function () {
-    moveUp()
-    animateUpMove()
+    if (currentDirection != "down") {
+        moveUp()
+        animateUpMove()
+        currentDirection = "up"
+    }
 })
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Food, function (sprite, otherSprite) {
     let score = 0
@@ -83,12 +89,18 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Food, function (sprite, other
     }
 })
 controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
-    moveRight()
-    animateRightMove()
+    if (currentDirection != "left") {
+        moveRight()
+        animateRightMove()
+        currentDirection = "right"
+    }
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    moveLeft()
-    animateLeftMove()
+    if (currentDirection != "right") {
+        moveLeft()
+        animateLeftMove()
+        currentDirection = "left"
+    }
 })
 function animateRightMove () {
     snakeHeadAnimation = animation.createAnimation(ActionKind.Walking, 1000)
@@ -127,16 +139,33 @@ function animateUpMove () {
     animation.setAction(snakeHead, ActionKind.Walking)
 }
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    moveRight()
-    animateRightMove()
+    if (currentDirection != "left") {
+        moveRight()
+        animateRightMove()
+        currentDirection = "right"
+    }
 })
+function animatePoison () {
+    animation.runMovementAnimation(
+    poison,
+    animation.animationPresets(animation.bobbing),
+    500,
+    false
+    )
+}
 controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
-    moveDown()
-    animateDownMove()
+    if (currentDirection != "up") {
+        moveDown()
+        animateDownMove()
+        currentDirection = "down"
+    }
 })
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    moveDown()
-    animateDownMove()
+    if (currentDirection != "up") {
+        moveDown()
+        animateDownMove()
+        currentDirection = "down"
+    }
 })
 info.onLifeZero(function () {
     game.gameOver(false)
@@ -191,8 +220,11 @@ function animateBanana () {
     )
 }
 controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
-    moveLeft()
-    animateLeftMove()
+    if (currentDirection != "right") {
+        moveLeft()
+        animateLeftMove()
+        currentDirection = "left"
+    }
 })
 function animateRaspberry () {
     animation.runMovementAnimation(
@@ -218,14 +250,19 @@ let snakeHeadYBeforeMove = 0
 let snakeHeadXBeforeMove = 0
 let snakeHead: Sprite = null
 let elixir: Sprite = null
+let poison: Sprite = null
 let banana: Sprite = null
 let raspberry: Sprite = null
 let apple: Sprite = null
+let currentDirection = ""
 let snakeSize = 0
 scene.setBackgroundImage(assets.image`background`)
+info.setScore(0)
+info.setLife(3)
 snakeSize = 8
 setSnakeHead()
 createSnakeBody()
+currentDirection = "up"
 apple = sprites.create(assets.image`myImage`, SpriteKind.Food)
 apple.setPosition(randint(20, 140), randint(20, 100))
 animateApple()
@@ -235,13 +272,13 @@ animateRaspberry()
 banana = sprites.create(assets.image`myImage0`, SpriteKind.Food)
 banana.setPosition(randint(20, 140), randint(20, 100))
 animateBanana()
-let poison = sprites.create(assets.image`potion10`, SpriteKind.Enemy)
+poison = sprites.create(assets.image`potion10`, SpriteKind.Enemy)
 poison.setPosition(randint(20, 140), randint(20, 100))
+animatePoison()
 elixir = sprites.create(assets.image`potion12`, SpriteKind.Elixir)
 elixir.setPosition(randint(20, 140), randint(20, 100))
 animateElixir()
-info.setScore(0)
-info.setLife(3)
 game.onUpdateInterval(5000, function () {
     poison.setPosition(randint(20, 140), randint(20, 100))
+    animatePoison()
 })
