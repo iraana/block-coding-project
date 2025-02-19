@@ -26,6 +26,7 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
 function moveRight () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove + snakeSize, snakeHeadYBeforeMove)
+    gameOver()
 }
 function lenghtenSnake () {
     if (list.length >= 2) {
@@ -41,6 +42,7 @@ function lenghtenSnake () {
 function moveUp () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove, snakeHeadYBeforeMove - snakeSize)
+    gameOver()
 }
 function moveSnakeBodySprite () {
     snakeHeadXBeforeMove = snakeHead.x
@@ -88,6 +90,9 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Food, function (sprite, other
         lenghtenSnake()
         console.logValue("snakeLenght", list.length)
     }
+    if (info.score() > 6) {
+        addPoison()
+    }
 })
 controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
     if (currentDirection != "left") {
@@ -124,6 +129,7 @@ function animateDownMove () {
 function moveDown () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove, snakeHeadYBeforeMove + snakeSize)
+    gameOver()
 }
 function animateApple () {
     animation.runMovementAnimation(
@@ -154,6 +160,17 @@ function animatePoison () {
     false
     )
 }
+function addPoison () {
+    newPoison = sprites.create(assets.image`potion10`, SpriteKind.Enemy)
+    newPoison.setPosition(randint(20, 140), randint(20, 100))
+    animatePoison()
+}
+function gameOver () {
+    if (snakeHead.x >= scene.screenWidth() || snakeHead.y >= scene.screenHeight() || (snakeHead.x <= 0 || snakeHead.y <= 0)) {
+        game.setGameOverPlayable(false, music.melodyPlayable(music.wawawawaa), false)
+        game.gameOver(false)
+    }
+}
 controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
     if (currentDirection != "up") {
         moveDown()
@@ -168,20 +185,12 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
         currentDirection = "down"
     }
 })
-info.onLifeZero(function () {
-    game.setGameOverPlayable(false, music.melodyPlayable(music.wawawawaa), false)
-    game.gameOver(false)
-})
 function animateLeftMove () {
     snakeHeadAnimation = animation.createAnimation(ActionKind.Walking, 1000)
     animation.attachAnimation(snakeHead, snakeHeadAnimation)
     snakeHeadAnimation.addAnimationFrame(assets.image`snakeHeadLeft`)
     animation.setAction(snakeHead, ActionKind.Walking)
 }
-sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.SnakeBody, function (sprite, otherSprite) {
-    music.play(music.melodyPlayable(music.siren), music.PlaybackMode.UntilDone)
-    info.changeLifeBy(-1)
-})
 function setSnakeHead () {
     snakeHeadImage = image.create(snakeSize, snakeSize)
     snakeHeadImage = assets.image`snakeHeadUp`
@@ -200,13 +209,15 @@ function createSnakeBody () {
 function moveLeft () {
     moveSnakeBodySprite()
     snakeHead.setPosition(snakeHeadXBeforeMove - snakeSize, snakeHeadYBeforeMove)
+    gameOver()
 }
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Enemy, function (sprite, otherSprite) {
     music.play(music.melodyPlayable(music.powerDown), music.PlaybackMode.UntilDone)
     poison.startEffect(effects.spray)
     effects.clearParticles(poison)
     poison.setPosition(randint(20, 140), randint(20, 90))
-    info.changeLifeBy(-1)
+    game.setGameOverPlayable(false, music.melodyPlayable(music.wawawawaa), false)
+    game.gameOver(false)
 })
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Elixir, function (sprite, otherSprite) {
     elixir.startEffect(effects.spray)
@@ -214,7 +225,10 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Elixir, function (sprite, oth
     effects.clearParticles(elixir)
     elixir.setPosition(randint(20, 90), randint(20, 90))
     animateElixir()
-    info.changeLifeBy(1)
+    info.changeScoreBy(2)
+    for (let index = 0; index < 2; index++) {
+        lenghtenSnake()
+    }
 })
 function animateBanana () {
     animation.runMovementAnimation(
@@ -241,6 +255,7 @@ function animateRaspberry () {
 }
 let temp = 0
 let snakeHeadImage: Image = null
+let newPoison: Sprite = null
 let sankeBodyImage: Image = null
 let bodyPart: Sprite = null
 let snakeHeadAnimation: animation.Animation = null
@@ -263,7 +278,6 @@ let currentDirection = ""
 let snakeSize = 0
 scene.setBackgroundImage(assets.image`background`)
 info.setScore(0)
-info.setLife(3)
 snakeSize = 8
 setSnakeHead()
 createSnakeBody()
