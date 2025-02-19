@@ -211,7 +211,6 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Enemy, function (sprite, othe
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Elixir, function (sprite, otherSprite) {
     elixir.startEffect(effects.spray)
     music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
-    pause(100)
     effects.clearParticles(elixir)
     elixir.setPosition(randint(20, 90), randint(20, 90))
     animateElixir()
