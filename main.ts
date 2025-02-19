@@ -62,6 +62,7 @@ sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Food, function (sprite, other
     let score = 0
     info.changeScoreBy(1)
     console.logValue("score", score)
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.UntilDone)
     if (otherSprite == apple) {
         apple.startEffect(effects.spray)
         pause(100)
@@ -168,6 +169,7 @@ controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 info.onLifeZero(function () {
+    game.setGameOverPlayable(false, music.melodyPlayable(music.wawawawaa), false)
     game.gameOver(false)
 })
 function animateLeftMove () {
@@ -177,7 +179,7 @@ function animateLeftMove () {
     animation.setAction(snakeHead, ActionKind.Walking)
 }
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.SnakeBody, function (sprite, otherSprite) {
-    pause(100)
+    music.play(music.melodyPlayable(music.siren), music.PlaybackMode.UntilDone)
     info.changeLifeBy(-1)
 })
 function setSnakeHead () {
@@ -190,8 +192,8 @@ function createSnakeBody () {
     sankeBodyImage = image.create(snakeSize, snakeSize)
     sankeBodyImage = assets.image`snakeBody`
     list = sprites.allOfKind(SpriteKind.SnakeBody)
-    for (let index = 0; index <= 5; index++) {
-        temp = index + 1
+    for (let index2 = 0; index2 <= 3; index2++) {
+        temp = index2 + 1
         connectBodyParts(snakeHead.x, snakeHead.y + temp * snakeSize)
     }
 }
@@ -200,11 +202,15 @@ function moveLeft () {
     snakeHead.setPosition(snakeHeadXBeforeMove - snakeSize, snakeHeadYBeforeMove)
 }
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Enemy, function (sprite, otherSprite) {
-    pause(100)
+    music.play(music.melodyPlayable(music.powerDown), music.PlaybackMode.UntilDone)
+    poison.startEffect(effects.spray)
+    effects.clearParticles(poison)
+    poison.setPosition(randint(20, 140), randint(20, 90))
     info.changeLifeBy(-1)
 })
 sprites.onOverlap(SpriteKind.SnakeHead, SpriteKind.Elixir, function (sprite, otherSprite) {
     elixir.startEffect(effects.spray)
+    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.UntilDone)
     pause(100)
     effects.clearParticles(elixir)
     elixir.setPosition(randint(20, 90), randint(20, 90))
